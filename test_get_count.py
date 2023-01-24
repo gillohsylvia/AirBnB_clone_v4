@@ -9,8 +9,3 @@ print("State objects: {}".format(storage.count(State)))
 
 first_state_id = list(storage.all(State).values())[0].id
 print("First state: {}".format(storage.get(State, first_state_id)))
-if len(storage.all(State))>0:
-    first_state_id = list(storage.all(State).values())[0].id
-else:
-    first_state_id = None
-    #display message or redirect the user
