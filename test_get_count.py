@@ -14,4 +14,3 @@ if len(storage.all(State))>0:
 else:
     first_state_id = None
     #display message or redirect the user
-
