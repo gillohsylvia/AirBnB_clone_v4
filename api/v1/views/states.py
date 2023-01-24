@@ -27,5 +27,6 @@ def delete_state(state_id):
     if state is None:
         abort(404)
     state.delete()
+    self.save()
     del state
     return jsonify({})
