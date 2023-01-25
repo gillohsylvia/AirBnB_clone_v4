@@ -1,59 +1,29 @@
 #!/usr/bin/python3
-"""
-Flask route that returns json status response on User Objects
-"""
-from api.v1.views import app_views
-from flask import jsonify, abort, request
-from models import storage
-from models.user import User
+""" holds class User"""
+import models
+from models.base_model import BaseModel, Base
+from os import getenv
+import sqlalchemy
+from sqlalchemy import Column, String
+from sqlalchemy.orm import relationship
 
 
-@app_views.route('/users', methods=['GET', 'POST'], strict_slashes=False)
-def list_or_create_users():
-    """
-    get or add new users
-    """
-    if request.method == 'GET':
-        users = storage.all(User)
-        return jsonify(
-            [user.to_dict() for user in users.values()]
-        )
-    if request.method == 'POST':
-        data = request.get_json()
-        if data is None:
-            abort(400, "Not a JSON")
-        if data.get("email") is None:
-            abort(400, "Missing email")
-        if data.get("password") is None:
-            abort(400, "Missing password")
-        new_user = User(**data)
-        new_user.save()
-        return jsonify(new_user.to_dict()), 201
+class User(BaseModel, Base):
+    """Representation of a user """
+    if models.storage_t == 'db':
+        __tablename__ = 'users'
+        email = Column(String(128), nullable=False)
+        password = Column(String(128), nullable=False)
+        first_name = Column(String(128), nullable=True)
+        last_name = Column(String(128), nullable=True)
+        places = relationship("Place", backref="user")
+        reviews = relationship("Review", backref="user", cascade="delete")
+    else:
+        email = ""
+        password = ""
+        first_name = ""
+        last_name = ""
 
-
-@app_views.route('/users/<user_id>',
-                 methods=['GET', 'DELETE', 'PUT'], strict_slashes=False)
-def get_or_delete_or_update_user(user_id):
-    """
-    get, delete or update user given user_id
-    """
-    user = storage.get(User, user_id)
-    if user is None:
-        abort(404)
-    if request.method == 'GET':
-        return jsonify(
-            user.to_dict()
-        )
-    if request.method == 'DELETE':
-        user.delete()
-        del user
-        return jsonify({}), 200
-    if request.method == 'PUT':
-        update = request.get_json()
-        if update is None:
-            abort(400, 'Not a JSON')
-        for key, val in update.items():
-            if key not in ('id', 'created_at', 'updated_at'):
-                setattr(user, key, val)
-        user.save()
-        return jsonify(user.to_dict()), 200
+    def __init__(self, *args, **kwargs):
+        """initializes user"""
+        super().__init__(*args, **kwargs)
