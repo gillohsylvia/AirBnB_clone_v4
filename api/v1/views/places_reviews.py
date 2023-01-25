@@ -10,19 +10,19 @@ from models.review import Review
 from models.user import User
 
 
-@app_views.route('/places/<place_id>/reviews', methods=['GET', 'POST'], strict_slashes=False)
+@app_views.route('/places/<place_id>/reviews',
+                 methods=['GET', 'POST'], strict_slashes=False)
 def list_or_create_reviews(place_id):
     """
-    get or add review to a place given its ID
+    get or add new review to a place given its ID
     """
     place = storage.get(Place, place_id)
     if place is None:
         abort(404, 'Not found')
     if request.method == 'GET':
         reviews = storage.all(Review)
-        return jsonify(
-            [review.to_dict() for review in reviews.values() if place.to_dict().get("place_id") == place_id]
-        )
+        return jsonify([review.to_dict() for review in reviews.values(
+        ) if review.to_dict().get("place_id") == place_id])
     if request.method == 'POST':
         data = request.get_json()
         if data is None:
@@ -44,7 +44,7 @@ def list_or_create_reviews(place_id):
                  methods=['GET', 'DELETE', 'PUT'], strict_slashes=False)
 def get_or_delete_or_update_review(review_id):
     """
-    get, add or update reviews given an ID
+    get, add or update reviews given review_ID
     """
     review = storage.get(Review, review_id)
     if review is None:
